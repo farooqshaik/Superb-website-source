@@ -1,0 +1,154 @@
+<!doctype html>
+<html>
+<head>
+    {% include "head.html" %}
+    <title>welcome to {{ title }}</title>
+</head>
+<body>
+
+
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <img src="/images/logo.png" width="70px" height="100px"> </img>
+        </div>
+
+        <ul class="nav navbar-nav navbar-right">
+            <li><a href="/random_data"><span class="glyphicon glyphicon-user"></span> Create New Account</a></li>
+            <li><a href="javascript:login();" id="login"><span class="glyphicon glyphicon-log-in"></span> Login </a> </li>
+            <li><a href="http://benefitwith.us" data-toggle="tooltip" data-placement="right" title="Go to benefitwith.us">
+                <img src="/images/BNFT.png" width="80px" height="40px"> </img> </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container" id="first_title">
+    <h1 align="center" id="title"> Welcome to Benefits </h1>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="login_modal" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header" style="padding:35px 50px;color: green">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4><span class="glyphicon glyphicon-lock"></span> Login</h4>
+            </div>
+            <div class="modal-body" style="padding:40px 50px;">
+                <form role="form" method="post" action="/myaccount" id="login_form">
+                    <div class="form-group">
+                        <label for="seed"><span class="glyphicon glyphicon-cog"></span> Seedphase </label>
+                        <input type="text" class="form-control" name="seed" id="seed" placeholder="Enter seedphase">
+                    </div>
+                    <div class="form-group">
+                        <label for="psw"><span class="glyphicon glyphicon-eye-open"></span> Password</label>
+                        <input type="text" class="form-control" name="password" id="psw" placeholder="Enter password">
+                    </div>
+                    <div class="checkbox">
+                        <label><input type="checkbox" value="" checked>Remember me</label>
+                    </div>
+                    <input type="hidden" id="address" name="address" value="">
+                    <input type="hidden" id="save_flag" name="save_flag" value="1">
+                    <button type="button" class="btn btn-success btn-block" id="btn_login"><span class="glyphicon glyphicon-off"></span> Login</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-danger btn-default pull-left" data-dismiss="modal">
+                    <span class="glyphicon glyphicon-remove"></span> Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+
+<script>
+    function login(){
+        $("#login_modal").modal('show');
+    }
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+
+        $("#login_modal").on('shown.bs.modal', function(){
+            $("#seed").val("");
+            $("#psw").val("");
+            $("#seed").focus();
+        });
+
+        $("#btn_login").click(function(){
+            var seed=$("#seed").val();
+            var password=$("#psw").val();
+            if(seed==""){
+                $("#seed").focus();
+            } else if(password==""){
+                $("#psw").focus();
+            } else{
+                $.ajax({
+                    url: "/users/login?seed="+seed+"&pw="+password,
+                    method:'post',
+                    success: function(result){
+                        if(result.address=="0"){
+                            alert("Seedphase or password is incorrect!");
+                            $("#seed").val("");
+                            $("#psw").val("");
+                            $("#seed").focus();
+                        } else{
+                            $("#address").val(result.address);
+                            document.getElementById("login_form").submit();
+                        }
+                    }
+                });
+            }
+        });
+
+    });
+</script>
+
+<style>
+    .container-fluid {
+        padding-right: 270px;
+        padding-left: 15px;
+        margin-right: auto;
+        margin-left: auto;
+        height: 150px;
+        font-size: 30px;
+        padding-top: 30px;
+        background-color: #b1d8e0;
+    }
+    .navbar-inverse .navbar-nav>li>a {
+        color: #6775c1;
+    }
+
+    .navbar {
+        border-radius: 2px;
+    }
+
+    .navbar-inverse {
+        border-color: #f1eded;
+    }
+
+    #first_title{
+        margin-top:20%;
+    }
+
+    body {
+        background: url(/images/bg1.jpg) no-repeat center center fixed;
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+    }
+
+    #title{
+        color: #fdfaf1;
+        font-family: Verdana;
+        font-weight: normal;
+        font-size: 100px;
+    }
+</style>
+
+

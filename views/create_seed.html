@@ -1,0 +1,160 @@
+<head>
+    {% include "head.html" %}
+    <script type="text/javascript" src="/javascripts/lightwallet.min.js"></script>
+    <script type="text/javascript" src="/javascripts/web3.js"></script>
+    <script type="text/javascript" src="/javascripts/hooked-web3-provider.js"></script>
+    <script type="text/javascript" src="/javascripts/async.js"></script>
+</head>
+
+<body>
+    <div class="container" style="width:700px;background:#F9EECF;border:1px dotted black;text-align:center;margin-top:20%;padding:10px;">
+        <textarea id="seed"></textarea>
+        <span style="font-size:20px;color:#00adff;margin-top:20px;">
+            Enter a password to encrypt your Passphrase in the Browser
+        </span>
+        <input type="text" class="form-control" id="mypassword" style="width:300px;margin-left:30%;">
+    </div>
+
+    <form method="post" action="/myaccount" id="myform">
+        <input type="hidden" name="seed" id="randomseed">
+        <input type="hidden" name="password" id="password">
+        <input type="hidden" name="address" id="address">
+        <input type="hidden" name="save_flag" id="save_flag" value="0">
+
+        <div class="container" style="margin-top:20px;text-align:center;>
+            <div class="btn-group">
+                <a href="/" class="btn btn-primary">Cancel</a>
+                <a class="btn btn-info" onclick="goAccount()"> Accept </a>
+                <a class="btn btn-primary" onclick="func_continue()"> Continue </a>
+            </div>
+        </div>
+    </form>
+
+</body>
+
+<!-- Copy seed Modal -->
+<div class="modal fade" id="copymodal" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-body">
+                <h3 id="save_title">You should copy your seedphase!</h3>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" id="btn_copy">
+                    <span class="glyphicon glyphicon-duplicate"> Copy Seed</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    var web3 = new Web3();
+    var global_keystore;
+    var randomSeed;
+    var address="123456789";
+    var myflag=false;
+
+    $(document).ready(function () {
+        $("#mypassword").focus();
+        var extraEntropy=$("#hidden_data").val();
+        randomSeed = lightwallet.keystore.generateRandomSeed(extraEntropy);
+        $("#seed").html(randomSeed);
+    });
+
+    function setWeb3Provider(keystore) {
+        var web3Provider = new HookedWeb3Provider({
+            //host: "http://104.236.65.136:8545",
+            host:"http://localhost:8545",
+            transaction_signer: keystore
+        });
+        web3.setProvider(web3Provider);
+    }
+
+    var balance;
+    function getBalances() {
+        var addresses = global_keystore.getAddresses();
+        async.map(addresses, web3.eth.getBalance, function(err, balances) {
+            async.map(addresses, web3.eth.getTransactionCount, function(err, nonces) {
+                console.log(balances);
+                balance=balances[0];
+                /*for (var i=0; i<addresses.length; ++i) {
+                    document.getElementById('addr').innerHTML += '<div>' + addresses[i] + ' (Bal: ' + (balances[i] / 1.0e18) + ' ETH, Nonce: ' + nonces[i] + ')' + '</div>'
+                }*/
+            })
+        })
+    }
+
+
+    function goAccount(){
+        var password=$("#mypassword").val();
+        if(password==0){
+            $("#mypassword").focus();
+        } else{
+            lightwallet.keystore.deriveKeyFromPassword(password, function(err, pwDerivedKey) {
+                global_keystore = new lightwallet.keystore(randomSeed,pwDerivedKey);
+                global_keystore.generateNewAddress(pwDerivedKey, 1);
+                var addresses = global_keystore.getAddresses();
+                address=addresses[0];
+                $("#address").val(address);
+                getBalances();
+                setWeb3Provider(global_keystore);
+                getBalances();
+            })
+            $("#randomseed").val(randomSeed);
+            $("#password").val(password);
+            myflag=true;
+            $("#copymodal").modal();
+        }
+    }
+
+    function func_continue(){
+        if(myflag==true){
+            document.getElementById("myform").submit();
+            //alert($("#address").val());
+        } else {
+            alert("To continue, press 'Accept'");
+        }
+    }
+</script>
+
+<script>
+    var copyTextareaBtn = document.querySelector('#btn_copy');
+    //document.getElementById("data").innerHTML="jkjlkjlkjlkjkljlkjlk";
+    copyTextareaBtn.addEventListener('click', function(event) {
+        var copyTextarea = document.querySelector('#seed');
+        copyTextarea.select();
+        try {
+            var successful = document.execCommand('copy');
+            var msg = successful ? 'successful' : 'unsuccessful';
+            console.log('Copying text command was ' + msg);
+        } catch (err) {
+            console.log('Oops, unable to copy');
+        }
+    });
+</script>
+
+
+<style>
+    body {
+        background: url(/images/bg.jpg) no-repeat center center fixed;
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+    }
+    #seed{
+        border: none;
+        background-color: #F9EECF;
+        font: small courier, monospace black;
+        width: 677px;
+        height: 77px; /* or whatever measurements you want */
+        overflow: auto;
+        font-size:25px;
+        color:#c000ff;
+    }
+</style>
+
+

@@ -1,0 +1,149 @@
+<html>
+<head>
+    {% include "head.html" %}
+</head>
+
+<h1 id="seed" style="visibility: hidden;">{{seed}}</h1>
+<input type="text" id="password" value={{password}} style="visibility: hidden;">
+<h1 id="address" style="visibility: hidden;">{{address}}</h1>
+<input type="hidden" id="save_flag" value={{save_flag}}>
+
+<div class="container" id="content">
+    <div class="list-group">
+        <a href="#" class="list-group-item active" style="text-align: center;">ADDRESS & BALANCE </a>
+        <a href="#" class="list-group-item" style="text-align: center;" title="Header" data-toggle="popover" data-placement="right" data-content="Content">
+           <span style="color:#ce23ff;font-family: Arial;"> {{address}} </span>     :    0.00ETH
+        </a>
+        <div class="container" style="margin-top:20px;">
+            <div class="dropdown">
+                <button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">
+                    Guide
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="save_data()">
+                        <span class="glyphicon glyphicon-floppy-disk"> Save Address </span> </a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="show_seedmodal()">
+                        <span class="glyphicon glyphicon-share"> Show Seed </span></a></li>
+                    <li role="presentation" class="divider"></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="/">
+                        <span class="glyphicon glyphicon-folder-close"> Logout </span></a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Success Modal -->
+<div class="modal fade" id="savemodal" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-body">
+                <h3 id="save_title"></h3>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- show_seed Modal -->
+<div class="modal fade" id="seedmodal" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Type your password</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="password" class="form-control" id="pwd">
+                </div>
+                <div>
+                    <span id="show_seed"> </span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" onclick="show_ok()">OK</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+
+<script>
+    var seed=$("#seed").html();
+    var pw=$("#password").val();
+    var address=$("#address").html();
+    var save_flag=$("#save_flag").val();
+
+    function save_data(){
+        if(save_flag=="0"){
+            $.ajax({url: "/users/save_data?seed="+seed+"&pw="+pw+"&address="+address,
+                success: function(result){
+                    $("#save_title").html("Successfully saved!");
+                    $("#savemodal").modal();
+                    console.log(result);
+                }
+            });
+        } else{
+            $("#save_title").html("Your address already saved!");
+            $("#savemodal").modal();
+        }
+    }
+
+    function show_seedmodal() {
+        $("#seedmodal").modal("show");
+        $("#seedmodal").on('shown.bs.modal', function (){
+            $("#pwd").val("");
+            $("#show_seed").html("");
+            $("#pwd").focus();
+        });
+    }
+
+    function show_ok(){
+        var pwd=$("#pwd").val();
+        if(pwd==""){
+            $("#pwd").focus();
+        } else{
+            if(pwd==pw){
+                $("#show_seed").html('"'+seed+'"');
+                $("#show_seed").css({
+                    "color":"blue",
+                    "font-size":"20px"
+                });
+            } else{
+                $("#pwd").val("");
+                $("#show_seed").html("Password is incorrect!");
+                $("#show_seed").css({
+                    "color":"red",
+                    "font-size":"17px"
+                });
+                $("#pwd").focus();
+            }
+        }
+    }
+
+</script>
+
+<style>
+    body {
+        background: url(/images/main-bg.jpg) no-repeat center center fixed;
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+    }
+    #content{
+        margin-top:10%;
+        width:70%;
+        font-size:30px;
+    }
+</style>

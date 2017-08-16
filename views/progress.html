@@ -1,0 +1,53 @@
+<head>
+    {% include "head.html" %}
+</head>
+
+<body onmousemove="myFunction(event)">
+
+    <div class="container" style="text-align: center;margin-top:20%">
+        <span>Please move your mouse to get random data!</span>
+    </div>
+    <div class="container" style="text-align: center; margin-top:10px;margin-bottom:10px;">
+        <div class="progress progress-striped active">
+            <div class="progress-bar progress-bar-info progress-bar-striped" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+            </div>
+        </div>
+    </div>
+    <div class="container" style="text-align: center;">
+        <a href="/show_seed" class="btn btn-warning" id="mybutton"> Continue </a>
+    </div>
+</body>
+
+<script>
+        document.getElementById("mybutton").style.visibility = "hidden";
+        var valeur=0;
+        var n=0;
+        function myFunction(){
+            n++;
+            if(n%4==0){
+                if(valeur<100){
+                    valeur++;
+                    $('.progress-bar').css('width', valeur+'%').attr('aria-valuenow', valeur);
+                    $('.progress-bar').html(valeur+"%");
+                }
+                if(valeur==100){
+                    document.getElementById("mybutton").style.visibility = "visible";
+                }
+            }
+        }
+</script>
+
+<style>
+    span{
+        font-size:35px;
+        color:#69f701;
+    }
+
+    body {
+        background: url(/images/bg2.jpg) no-repeat center center fixed;
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+    }
+</style>
